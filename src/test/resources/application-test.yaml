@@ -8,8 +8,3 @@ spring:
     database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
       ddl-auto: create-drop
-
-admin:
-  auth:
-    token-encryption-enabled: false
-    jwt-public-key: ""

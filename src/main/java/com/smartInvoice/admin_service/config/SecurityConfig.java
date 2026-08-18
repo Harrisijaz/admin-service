@@ -1,13 +1,10 @@
 package com.smartInvoice.admin_service.config;
 
 import com.smartInvoice.admin_service.service.AdminPrincipal;
-import com.smartInvoice.admin_service.service.AdminTokenService;
-import com.smartInvoice.admin_service.web.ApiException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.http.MediaType;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -25,12 +22,12 @@ import java.util.List;
 @Configuration
 public class SecurityConfig {
 	@Bean
-	SecurityFilterChain securityFilterChain(HttpSecurity http, AdminTokenService tokenService) throws Exception {
+	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http.csrf(AbstractHttpConfigurer::disable)
 				.authorizeHttpRequests(auth -> auth
 						.requestMatchers("/actuator/health").permitAll()
 						.anyRequest().hasRole("ADMIN"))
-				.addFilterBefore(new AdminTokenFilter(tokenService), UsernamePasswordAuthenticationFilter.class)
+				.addFilterBefore(new GatewayAdminHeaderFilter(), UsernamePasswordAuthenticationFilter.class)
 				.headers(headers -> headers
 						.contentTypeOptions(content -> {})
 						.frameOptions(frame -> frame.deny())
@@ -38,28 +35,17 @@ public class SecurityConfig {
 		return http.build();
 	}
 
-	private static class AdminTokenFilter extends OncePerRequestFilter {
-		private final AdminTokenService tokenService;
-
-		private AdminTokenFilter(AdminTokenService tokenService) {
-			this.tokenService = tokenService;
-		}
-
+	private static class GatewayAdminHeaderFilter extends OncePerRequestFilter {
 		@Override
 		protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 				throws ServletException, IOException {
-			String authorization = request.getHeader("Authorization");
-			if (authorization != null && authorization.startsWith("Bearer ")) {
-				try {
-					AdminPrincipal principal = tokenService.verify(authorization);
-					SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
-							principal, null, List.of(new SimpleGrantedAuthority("ROLE_ADMIN"))));
-				} catch (ApiException ex) {
-					response.setStatus(ex.getStatus().value());
-					response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-					response.getWriter().write("{\"code\":\"" + ex.getCode() + "\",\"message\":\"" + ex.getMessage() + "\"}");
-					return;
-				}
+			String role = request.getHeader("X-User-Role");
+			String userId = request.getHeader("X-User-Id");
+			String email = request.getHeader("X-User-Email");
+			if ("ADMIN".equals(role) && userId != null && !userId.isBlank()) {
+				AdminPrincipal principal = new AdminPrincipal(userId, email == null ? "" : email, "");
+				SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(
+						principal, null, List.of(new SimpleGrantedAuthority("ROLE_ADMIN"))));
 			}
 			filterChain.doFilter(request, response);
 		}
