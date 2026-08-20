@@ -49,6 +49,7 @@ public class UserAdminService {
 		Pageable pageable = pageable(page, limit, sortBy, direction);
 		Page<UserSummary> result = users.findAll((root, query, cb) -> {
 			List<Predicate> predicates = new ArrayList<>();
+			predicates.add(cb.equal(root.get("role"), UserRole.USER));
 			String clean = AdminValidation.trimmed(search);
 			if (clean != null && !clean.isBlank()) {
 				String like = "%" + clean.toLowerCase() + "%";

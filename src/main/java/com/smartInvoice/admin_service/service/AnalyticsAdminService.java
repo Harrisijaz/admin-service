@@ -41,7 +41,7 @@ public class AnalyticsAdminService {
 		BigDecimal currentRevenue = payments.recognizedRevenue(currentStart, currentEnd);
 		BigDecimal previousRevenue = payments.recognizedRevenue(previousStart, currentStart);
 		long paid = subscriptions.countByPlanTypeAndStatusIn(PlanType.PAID, List.of(SubscriptionStatus.ACTIVE, SubscriptionStatus.PAST_DUE));
-		long total = users.countByStatusNot(AccountStatus.DELETED);
+		long total = users.countByRoleAndStatusNot(UserRole.USER, AccountStatus.DELETED);
 		long churn = subscriptions.countByPlanTypeAndCancelledAtBetween(PlanType.PAID,
 				startDate.atStartOfDay(ZoneOffset.UTC).toInstant(), endDate.plusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant());
 		return new DashboardResponse(total, Math.max(total - paid, 0), paid, currentRevenue, previousRevenue,
@@ -67,7 +67,7 @@ public class AnalyticsAdminService {
 		for (LocalDate date = start; !date.isAfter(end); date = date.plusDays(1)) {
 			Instant from = date.atStartOfDay(ZoneOffset.UTC).toInstant();
 			Instant to = date.plusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant();
-			points.add(new SignupPoint(date, users.countByStatusNotAndCreatedAtBetween(AccountStatus.DELETED, from, to)));
+			points.add(new SignupPoint(date, users.countByRoleAndStatusNotAndCreatedAtBetween(UserRole.USER, AccountStatus.DELETED, from, to)));
 		}
 		return points;
 	}

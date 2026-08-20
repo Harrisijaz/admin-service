@@ -30,6 +30,10 @@ public class User {
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false, length = 20)
+	private UserRole role = UserRole.USER;
+
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false, length = 20)
 	private AccountStatus status = AccountStatus.UNVERIFIED;
 
 	@Column(nullable = false, updatable = false)
@@ -51,6 +55,8 @@ public class User {
 	public void setEmailNormalized(String emailNormalized) { this.emailNormalized = emailNormalized; }
 	public String getFullName() { return fullName; }
 	public void setFullName(String fullName) { this.fullName = fullName; }
+	public UserRole getRole() { return role; }
+	public void setRole(UserRole role) { this.role = role; }
 	public AccountStatus getStatus() { return status; }
 	public void setStatus(AccountStatus status) { this.status = status; }
 	public Instant getCreatedAt() { return createdAt; }
