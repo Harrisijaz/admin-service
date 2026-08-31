@@ -6,28 +6,37 @@ import com.nimbusds.jose.JWEObject;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.crypto.DirectDecrypter;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
+import com.nimbusds.jose.jwk.JWK;
+import com.nimbusds.jose.jwk.JWKSet;
+import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.smartInvoice.admin_service.config.AdminProperties;
 import com.smartInvoice.admin_service.web.ApiException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.security.KeyFactory;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.X509EncodedKeySpec;
 import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Base64;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Service
 public class AdminTokenService {
 	private final AdminProperties properties;
 	private final Clock clock;
+	private final WebClient webClient;
+	private final AtomicReference<JWKSet> jwksCache = new AtomicReference<>();
 
-	public AdminTokenService(AdminProperties properties, Clock clock) {
+	public AdminTokenService(AdminProperties properties, Clock clock, WebClient.Builder builder) {
 		this.properties = properties;
 		this.clock = clock;
+		this.webClient = builder.build();
 	}
 
 	public AdminPrincipal verify(String authorization) {
@@ -38,7 +47,7 @@ public class AdminTokenService {
 					|| !properties.getAuth().getJwtKeyId().equals(jwt.getHeader().getKeyID())) {
 				throw invalid("Invalid admin token.");
 			}
-			RSAPublicKey publicKey = parsePublicKey(properties.getAuth().getJwtPublicKey());
+			RSAPublicKey publicKey = resolvePublicKey(jwt);
 			if (!jwt.verify(new RSASSAVerifier(publicKey))) {
 				throw invalid("Invalid admin token signature.");
 			}
@@ -68,6 +77,42 @@ public class AdminTokenService {
 			throw new ApiException(HttpStatus.UNAUTHORIZED, "MISSING_ADMIN_TOKEN", "A valid admin session is required.");
 		}
 		return authorization.substring(7).trim();
+	}
+
+	private RSAPublicKey resolvePublicKey(SignedJWT jwt) throws Exception {
+		String configured = properties.getAuth().getJwtPublicKey();
+		if (configured != null && !configured.isBlank()) {
+			return parsePublicKey(configured);
+		}
+		JWKSet jwkSet = jwks();
+		JWK jwk = jwt.getHeader().getKeyID() == null
+				? jwkSet.getKeys().stream().findFirst().orElse(null)
+				: jwkSet.getKeyByKeyId(jwt.getHeader().getKeyID());
+		if (!(jwk instanceof RSAKey rsaKey)) {
+			throw invalid("Admin JWT signing key is not available.");
+		}
+		return rsaKey.toRSAPublicKey();
+	}
+
+	private JWKSet jwks() {
+		JWKSet cached = jwksCache.get();
+		if (cached != null) {
+			return cached;
+		}
+		try {
+			String body = webClient.get()
+					.uri(properties.getAuth().getJwksUrl())
+					.retrieve()
+					.bodyToMono(String.class)
+					.block(Duration.ofSeconds(5));
+			JWKSet jwkSet = JWKSet.parse(body);
+			jwksCache.set(jwkSet);
+			return jwkSet;
+		} catch (ApiException ex) {
+			throw ex;
+		} catch (Exception ex) {
+			throw invalid("Admin JWT key service is not available.");
+		}
 	}
 
 	private String decryptIfNeeded(String token) throws Exception {

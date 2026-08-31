@@ -17,18 +17,19 @@ spring:
     open-in-view: false
 
 server:
-  port : 9094
+  port : 9091
 
 admin:
   auth:
     issuer: ${AUTH_ISSUER:smart-invoice-auth}
     jwt-key-id: ${AUTH_JWT_KEY_ID:smart-invoice-auth-key}
+    jwks-url: ${ADMIN_JWKS_URL:http://localhost:9090/auth/.well-known/jwks.json}
     jwt-public-key: ${AUTH_JWT_PUBLIC_KEY:}
     jwe-secret: ${AUTH_JWE_SECRET:}
-    token-encryption-enabled: ${AUTH_TOKEN_ENCRYPTION_ENABLED:true}
+    token-encryption-enabled: ${AUTH_TOKEN_ENCRYPTION_ENABLED:false}
     inactivity-timeout-minutes: ${ADMIN_SESSION_TIMEOUT_MINUTES:20}
   integrations:
     auth-service-base-url: ${AUTH_SERVICE_BASE_URL:http://localhost:9090}
-    user-service-base-url: ${USER_SERVICE_BASE_URL:http://localhost:9091}
+    user-service-base-url: ${USER_SERVICE_BASE_URL:http://localhost:9092}
     payment-service-base-url: ${PAYMENT_SERVICE_BASE_URL:http://localhost:9093}
     ai-service-base-url: ${AI_SERVICE_BASE_URL:http://localhost:9095}

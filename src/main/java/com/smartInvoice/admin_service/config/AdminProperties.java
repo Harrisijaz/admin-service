@@ -13,15 +13,18 @@ public class AdminProperties {
 	public static class Auth {
 		private String issuer = "smart-invoice-auth";
 		private String jwtKeyId = "smart-invoice-auth-key";
+		private String jwksUrl = "http://localhost:9090/auth/.well-known/jwks.json";
 		private String jwtPublicKey = "";
 		private String jweSecret = "";
-		private boolean tokenEncryptionEnabled = true;
+		private boolean tokenEncryptionEnabled = false;
 		private int inactivityTimeoutMinutes = 20;
 
 		public String getIssuer() { return issuer; }
 		public void setIssuer(String issuer) { this.issuer = issuer; }
 		public String getJwtKeyId() { return jwtKeyId; }
 		public void setJwtKeyId(String jwtKeyId) { this.jwtKeyId = jwtKeyId; }
+		public String getJwksUrl() { return jwksUrl; }
+		public void setJwksUrl(String jwksUrl) { this.jwksUrl = jwksUrl; }
 		public String getJwtPublicKey() { return jwtPublicKey; }
 		public void setJwtPublicKey(String jwtPublicKey) { this.jwtPublicKey = jwtPublicKey; }
 		public String getJweSecret() { return jweSecret; }
@@ -34,7 +37,7 @@ public class AdminProperties {
 
 	public static class Integrations {
 		private String authServiceBaseUrl = "http://localhost:9090";
-		private String userServiceBaseUrl = "http://localhost:9091";
+		private String userServiceBaseUrl = "http://localhost:9092";
 		private String paymentServiceBaseUrl = "http://localhost:9093";
 		private String aiServiceBaseUrl = "http://localhost:9095";
 
