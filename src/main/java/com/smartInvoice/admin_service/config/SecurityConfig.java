@@ -29,6 +29,7 @@ public class SecurityConfig {
 		http.csrf(AbstractHttpConfigurer::disable)
 				.authorizeHttpRequests(auth -> auth
 						.requestMatchers("/actuator/health").permitAll()
+						.requestMatchers("/api/blog/**").permitAll()
 						.anyRequest().hasRole("ADMIN"))
 				.addFilterBefore(new AdminTokenFilter(tokenService), UsernamePasswordAuthenticationFilter.class)
 				.headers(headers -> headers

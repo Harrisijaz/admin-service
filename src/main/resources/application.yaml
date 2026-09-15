@@ -15,6 +15,10 @@ spring:
       hibernate:
         format_sql: false
     open-in-view: false
+  servlet:
+    multipart:
+      max-file-size: ${BLOG_MAX_UPLOAD_SIZE:5MB}
+      max-request-size: ${BLOG_MAX_UPLOAD_SIZE:5MB}
 
 server:
   port : 9091
@@ -33,3 +37,14 @@ admin:
     user-service-base-url: ${USER_SERVICE_BASE_URL:http://localhost:9092}
     payment-service-base-url: ${PAYMENT_SERVICE_BASE_URL:http://localhost:9093}
     ai-service-base-url: ${AI_SERVICE_BASE_URL:http://localhost:9095}
+
+blog:
+  max-page-size: ${BLOG_MAX_PAGE_SIZE:50}
+  max-tags-per-post: ${BLOG_MAX_TAGS_PER_POST:10}
+  max-product-links-per-post: ${BLOG_MAX_PRODUCT_LINKS_PER_POST:8}
+  cover-image-required-for-publish: ${BLOG_COVER_IMAGE_REQUIRED:false}
+  max-upload-bytes: ${BLOG_MAX_UPLOAD_BYTES:5242880}
+  media-base-url: ${BLOG_MEDIA_BASE_URL:http://localhost:9091/uploads/blog}
+  media-upload-dir: ${BLOG_MEDIA_UPLOAD_DIR:uploads/blog}
+  nextjs-revalidation-url: ${NEXTJS_REVALIDATION_URL:}
+  nextjs-revalidation-secret: ${NEXTJS_REVALIDATION_SECRET:}

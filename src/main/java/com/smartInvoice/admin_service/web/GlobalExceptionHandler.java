@@ -1,11 +1,13 @@
 package com.smartInvoice.admin_service.web;
 
 import jakarta.validation.ConstraintViolationException;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import java.time.Instant;
 import java.util.LinkedHashMap;
@@ -28,6 +30,24 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler(ConstraintViolationException.class)
 	ResponseEntity<ApiError> paramValidation(ConstraintViolationException ex) {
 		return ResponseEntity.badRequest().body(ApiError.of("VALIDATION_ERROR", ex.getMessage()));
+	}
+
+	@ExceptionHandler(BlogPublishValidationException.class)
+	ResponseEntity<ApiError> blogPublishValidation(BlogPublishValidationException ex) {
+		return ResponseEntity.badRequest()
+				.body(new ApiError("BLOG_PUBLISH_VALIDATION_FAILED", ex.getMessage(), Instant.now(), ex.getErrors()));
+	}
+
+	@ExceptionHandler(OptimisticLockingFailureException.class)
+	ResponseEntity<ApiError> optimisticLock(OptimisticLockingFailureException ex) {
+		return ResponseEntity.status(HttpStatus.CONFLICT)
+				.body(ApiError.of("BLOG_VERSION_CONFLICT", "This blog post was updated by another user. Refresh and try again."));
+	}
+
+	@ExceptionHandler(MaxUploadSizeExceededException.class)
+	ResponseEntity<ApiError> maxUpload(MaxUploadSizeExceededException ex) {
+		return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
+				.body(ApiError.of("BLOG_UPLOAD_TOO_LARGE", "Uploaded file is too large."));
 	}
 
 	@ExceptionHandler(Exception.class)
