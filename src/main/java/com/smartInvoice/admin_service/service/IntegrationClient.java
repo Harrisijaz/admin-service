@@ -11,8 +11,10 @@ public class IntegrationClient {
 	private final WebClient authClient;
 	private final WebClient userClient;
 	private final WebClient paymentClient;
+	private final AdminProperties properties;
 
 	public IntegrationClient(WebClient.Builder builder, AdminProperties properties) {
+		this.properties = properties;
 		this.authClient = builder.clone().baseUrl(properties.getIntegrations().getAuthServiceBaseUrl()).build();
 		this.userClient = builder.clone().baseUrl(properties.getIntegrations().getUserServiceBaseUrl()).build();
 		this.paymentClient = builder.clone().baseUrl(properties.getIntegrations().getPaymentServiceBaseUrl()).build();
@@ -28,6 +30,15 @@ public class IntegrationClient {
 
 	public void invalidateUserSessions(String userId) {
 		authClient.post().uri("/internal/admin/users/{userId}/sessions/invalidate", userId).retrieve().toBodilessEntity().block();
+	}
+
+	public void reconcileBilling(String userId) {
+		userClient.post()
+				.uri("/internal/admin/billing/users/{userId}/sync", userId)
+				.header("X-Internal-Token", properties.getIntegrations().getBillingSyncSecret())
+				.retrieve()
+				.toBodilessEntity()
+				.block();
 	}
 
 	public Object invoices(String userId) {

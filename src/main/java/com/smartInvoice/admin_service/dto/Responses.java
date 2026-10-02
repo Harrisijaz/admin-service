@@ -33,6 +33,28 @@ public final class Responses {
 			Object expenses) {
 	}
 
+	public record BillingOverview(
+			List<SubscriptionAdminRow> subscriptions,
+			List<PaymentAdminRow> failedOrPendingPayments) {
+	}
+
+	public record SubscriptionAdminRow(
+			Subscription subscription,
+			BillingUser user) {
+	}
+
+	public record PaymentAdminRow(
+			Payment payment,
+			BillingUser user) {
+	}
+
+	public record BillingUser(
+			String id,
+			String name,
+			String email,
+			AccountStatus accountStatus) {
+	}
+
 	public record CsvExport(String filename, String contentType, String csv) {
 	}
 

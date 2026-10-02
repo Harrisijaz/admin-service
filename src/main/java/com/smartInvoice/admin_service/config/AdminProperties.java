@@ -40,6 +40,7 @@ public class AdminProperties {
 		private String userServiceBaseUrl = "http://localhost:9092";
 		private String paymentServiceBaseUrl = "http://localhost:9093";
 		private String aiServiceBaseUrl = "http://localhost:9095";
+		private String billingSyncSecret = "change-me";
 
 		public String getAuthServiceBaseUrl() { return authServiceBaseUrl; }
 		public void setAuthServiceBaseUrl(String authServiceBaseUrl) { this.authServiceBaseUrl = authServiceBaseUrl; }
@@ -49,5 +50,7 @@ public class AdminProperties {
 		public void setPaymentServiceBaseUrl(String paymentServiceBaseUrl) { this.paymentServiceBaseUrl = paymentServiceBaseUrl; }
 		public String getAiServiceBaseUrl() { return aiServiceBaseUrl; }
 		public void setAiServiceBaseUrl(String aiServiceBaseUrl) { this.aiServiceBaseUrl = aiServiceBaseUrl; }
+		public String getBillingSyncSecret() { return billingSyncSecret; }
+		public void setBillingSyncSecret(String billingSyncSecret) { this.billingSyncSecret = billingSyncSecret; }
 	}
 }

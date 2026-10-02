@@ -30,6 +30,7 @@ public class SecurityConfig {
 				.authorizeHttpRequests(auth -> auth
 						.requestMatchers("/actuator/health").permitAll()
 						.requestMatchers("/api/blog/**").permitAll()
+						.requestMatchers("/admin/billing/internal/**").permitAll()
 						.anyRequest().hasRole("ADMIN"))
 				.addFilterBefore(new AdminTokenFilter(tokenService), UsernamePasswordAuthenticationFilter.class)
 				.headers(headers -> headers

@@ -13,6 +13,7 @@ import java.util.Optional;
 public interface SubscriptionRepository extends JpaRepository<Subscription, String> {
 	Optional<Subscription> findFirstByUserIdOrderByStartDateDesc(String userId);
 	List<Subscription> findByUserIdOrderByStartDateDesc(String userId);
+	List<Subscription> findByPlanTypeAndStatusInOrderByStartDateDesc(PlanType planType, Collection<SubscriptionStatus> statuses);
 	long countByPlanTypeAndStatusIn(PlanType planType, Collection<SubscriptionStatus> statuses);
 	long countByPlanTypeAndCancelledAtBetween(PlanType planType, Instant start, Instant end);
 	boolean existsByUserIdAndPlanTypeAndStatusIn(String userId, PlanType planType, Collection<SubscriptionStatus> statuses);

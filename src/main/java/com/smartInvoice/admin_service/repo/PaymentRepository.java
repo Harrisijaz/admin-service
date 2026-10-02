@@ -10,10 +10,12 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 public interface PaymentRepository extends JpaRepository<Payment, String> {
 	List<Payment> findByUserIdOrderByCreatedAtDesc(String userId);
 	List<Payment> findByStatusInOrderByCreatedAtDesc(Collection<PaymentStatus> statuses);
+	Optional<Payment> findByGatewayReference(String gatewayReference);
 
 	@Query("select coalesce(sum(p.amount), 0) from Payment p where p.status = 'SUCCEEDED' and p.createdAt >= :start and p.createdAt < :end")
 	BigDecimal recognizedRevenue(@Param("start") Instant start, @Param("end") Instant end);

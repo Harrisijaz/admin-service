@@ -37,6 +37,7 @@ admin:
     user-service-base-url: ${USER_SERVICE_BASE_URL:http://localhost:9092}
     payment-service-base-url: ${PAYMENT_SERVICE_BASE_URL:http://localhost:9093}
     ai-service-base-url: ${AI_SERVICE_BASE_URL:http://localhost:9095}
+    billing-sync-secret: ${BILLING_SYNC_SECRET:change-me}
 
 blog:
   max-page-size: ${BLOG_MAX_PAGE_SIZE:50}
